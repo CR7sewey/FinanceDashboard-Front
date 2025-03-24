@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function TransactionForm({ onTransactionAdded }: { onTransactionAdded: () => void }) {
     const [amount, setAmount] = useState("");
@@ -19,11 +20,14 @@ export default function TransactionForm({ onTransactionAdded }: { onTransactionA
                 { amount: parseFloat(amount), type, category },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            toast.success("Transação adicionada com sucesso!");
+
             setAmount("");
             setCategory("");
             onTransactionAdded();
         } catch (error) {
             console.error("Erro ao adicionar transação", error);
+            toast.error("Erro ao adicionar transação");
         }
     };
 
@@ -48,8 +52,11 @@ export default function TransactionForm({ onTransactionAdded }: { onTransactionA
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
             />
-            <button type="submit" className="p-2 bg-blue-500 text-white rounded-md">
-                Adicionar
+            <button
+                type="submit"
+                className="mt-2 bg-blue-500 hover:bg-blue-600 active:scale-95 transition-all text-white p-2 rounded w-full"
+            >
+                Adicionar Transação
             </button>
         </form>
     );
