@@ -10,13 +10,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTransactions } from "@/hook/useTransactions";
 import ThemeToggle from "@/components/ThemeToggle";
 import Navbar from "@/components/Navbar";
+import { useCallback, useEffect } from "react";
+import { useState } from "react";
 
 
 export default function Dashboard() {
-    const { logout } = useAuthStore();
+    const { token, logout } = useAuthStore();
     const router = useRouter();
     const account = useAccount();
 
+
+
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            const res = await fetch("/api/stripe/transactions", { method: "POST" });
+            const data = await res.json();
+            return data;
+        };
+
+        fetchTransactions();
+    }, [token]);
+
+    /*const fetchClientSecret = useCallback(async () => {
+        // Create a Checkout Session
+        const res = await fetch("/api/stripe/transactions", { method: "POST" });
+        const data = await res.json();
+        console.log("AQUI", data);
+        return data.transactions;
+    }, []);*/
+    //const options = transactions;
+
+    //const transactions = useTransactions(fetchClientSecret());
     const transactions = useTransactions();
     const income = transactions.filter((t: Transaction) => t.type === "income").reduce((acc: number, t: Transaction) => acc + t.amount, 0);
     const expense = transactions.filter((t: Transaction) => t.type === "expense").reduce((acc: number, t: Transaction) => acc + t.amount, 0);
@@ -74,6 +98,19 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <TransactionsChart />
                     <CategoryChart />
+                </div>
+                <div className="p-6">
+                    <h1 className="text-2xl font-bold">Últimas Transações</h1>
+                    <ul className="mt-4">
+                        {transactions.map((t: Transaction) => (
+                            <li key={t.id} className="border-b py-2">
+                                <div className="flex justify-between">
+                                    <span className="font-semibold" >{t.id}</span>
+                                    <span className="text-gray-500" style={{ color: t.type === "income" ? "green" : "red" }}>R$ {t.amount}</span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
 
                 <button
